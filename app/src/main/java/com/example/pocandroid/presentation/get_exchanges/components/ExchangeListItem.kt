@@ -29,13 +29,12 @@ fun ExchangeListItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "${exchange.rank}. ${exchange.name}",
+            text = exchange.name,
             style = MaterialTheme.typography.body1,
             overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = if(exchange.active) "active" else "inactive",
-            color = if(exchange.active) Color.Green else Color.Red,
+            text = exchange.volume.toString(),
             fontStyle = FontStyle.Italic,
             textAlign = TextAlign.End,
             style = MaterialTheme.typography.body2,

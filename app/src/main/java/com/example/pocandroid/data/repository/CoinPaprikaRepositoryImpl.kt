@@ -10,8 +10,4 @@ class CoinPaprikaRepositoryImpl @Inject constructor(private val coinPaprikaApi: 
     override suspend fun getCoins(): List<Coin> {
         return coinPaprikaApi.getCoins().map { it.toCoin() }
     }
-
-    override suspend fun getExchanges(quote: String): List<Exchange> {
-        return coinPaprikaApi.getExchanges(quote).map { it.toExchange() }
-    }
 }
