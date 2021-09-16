@@ -6,21 +6,29 @@ import com.example.pocandroid.data.repository.CoinRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import java.math.BigDecimal
 
 @ExperimentalCoroutinesApi
 class CoinRepositoryUnitTest {
+
+    private lateinit var coinRepositoryMockk: CoinRepositoryImpl
+    private lateinit var coinApiMockk: CoinApi
 
     private lateinit var coinRepository: CoinRepositoryImpl
     private lateinit var coinApi: CoinApi
 
     @Before
     fun setup() {
-        coinApi = mockk<CoinApi>()
+        coinApiMockk = mockk()
+        coinRepositoryMockk = CoinRepositoryImpl(coinApiMockk)
+
+        coinApi = mock()
         coinRepository = CoinRepositoryImpl(coinApi)
     }
 
@@ -35,7 +43,7 @@ class CoinRepositoryUnitTest {
 //    }
 
     @Test
-    fun `should return a list of exchanges`() = runBlockingTest {
+    fun `should return a list of exchanges with mockk`() = runBlockingTest {
 
         val listDto: MutableList<ExchangeDto> = mutableListOf()
 
@@ -43,22 +51,40 @@ class CoinRepositoryUnitTest {
             ExchangeDto(
                 "2021-09-09", "2021-09-09", "2021-09-09", "2021-09-09",
                 "2021-09-09", "2021-09-09", 10, "2021-09-09", "2021-09-09",
-                "BNC", "Binance", 10.0, 1.0, 300.0, "www.google.com"
+                "BNC", "Binance", BigDecimal(10), BigDecimal(10), BigDecimal(10), "www.google.com"
             )
         )
 
         val list = listDto.map { it.toExchange() }
 
-        coEvery { coinApi.getExchanges() } returns listDto
+        coEvery { coinApiMockk.getExchanges() } returns listDto
 
-        async {
-            coinRepository.getExchanges()
-        }.await()
-            .let { result ->
+        val exchanges = coinRepositoryMockk.getExchanges()
 
-                Assert.assertTrue(result.isNotEmpty())
-                Assert.assertTrue(list.containsAll(result))
+        Assert.assertTrue(exchanges.isNotEmpty())
+        Assert.assertTrue(list.containsAll(exchanges))
+    }
 
-            }
+    @Test
+    fun `should return a list of exchanges with mockito`() = runBlockingTest {
+
+        val listDto: MutableList<ExchangeDto> = mutableListOf()
+
+        listDto.add(
+            ExchangeDto(
+                "2021-09-09", "2021-09-09", "2021-09-09", "2021-09-09",
+                "2021-09-09", "2021-09-09", 10, "2021-09-09", "2021-09-09",
+                "BNC", "Binance", BigDecimal(10), BigDecimal(10), BigDecimal(10), "www.google.com"
+            )
+        )
+
+        val list = listDto.map { it.toExchange() }
+
+        whenever(coinApi.getExchanges()).thenReturn(listDto)
+
+        val exchanges = coinRepository.getExchanges()
+
+        Assert.assertTrue(exchanges.isNotEmpty())
+        Assert.assertTrue(list.containsAll(exchanges))
     }
 }
